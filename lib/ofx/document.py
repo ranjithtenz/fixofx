@@ -41,15 +41,8 @@ class Document:
         # method so that we can start to survey what encodings
         # we're actually seeing, and use that to maybe be smarter
         # about this in the future.
-        encoding = ""
-        if self.parse_dict["header"]["ENCODING"] == "USASCII":
-            encoding = "US-ASCII"
-        elif self.parse_dict["header"]["ENCODING"] == "UNICODE":
-            encoding = "UTF-8"
-        elif self.parse_dict["header"]["ENCODING"] == "NONE":
-            encoding = "UTF-8"
-        else:
-            encoding = self.parse_dict["header"]["ENCODING"]
+        #forcing encoding to utf-8
+        encoding = "UTF-8"
 
         xml += """<?xml version="1.0" encoding="%s"?>\n""" % encoding
         xml += """<?OFX OFXHEADER="200" VERSION="200" """ + \
