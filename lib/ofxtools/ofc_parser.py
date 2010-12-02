@@ -1,11 +1,13 @@
+#coding: utf-8
+
 # Copyright 2005-2010 Wesabe, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,13 +32,13 @@ class OfcParser:
         aggregate << Group(aggregate_open_tag \
             + Dict(OneOrMore(aggregate | content)) \
             + aggregate_close_tag)
-        
+
         self.parser = Group(aggregate).setResultsName("document")
         if (debug):
-            self.parser.setDebugActions(ofxtools._ofxtoolsStartDebugAction, 
-                                        ofxtools._ofxtoolsSuccessDebugAction, 
+            self.parser.setDebugActions(ofxtools._ofxtoolsStartDebugAction,
+                                        ofxtools._ofxtoolsSuccessDebugAction,
                                         ofxtools._ofxtoolsExceptionDebugAction)
-    
+
     def _tag(self, closed=True):
         """Generate parser definitions for OFX tags."""
         openTag = Literal("<").suppress() + Word(alphanums + ".") \
@@ -46,10 +48,10 @@ class OfcParser:
             return openTag, closeTag
         else:
             return openTag
-    
+
     def parse(self, ofc):
         """Parse a string argument and return a tree structure representing
         the parsed document."""
         return self.parser.parseString(ofc).asDict()
-    
+
 
