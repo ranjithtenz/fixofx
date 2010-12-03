@@ -175,6 +175,7 @@ if options.filename:
 
         try:
             srcfile = open(options.filename, 'rU')
+            import ipdb; ipdb.set_trace()
             rawtext = srcfile.read()
             srcfile.close()
         except StandardError, detail:
@@ -191,7 +192,7 @@ if options.filename:
 elif options.string:
     if options.verbose:
         sys.stderr.write("Reading from string\n")
-    rawtext = options.string
+    rawtext = options.string.replace('\r','')
 
 else:
     if options.verbose:
