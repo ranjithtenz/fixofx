@@ -17,7 +17,7 @@
 #
 #  ofxtools.ofc_parser - parser class for reading OFC documents.
 #
-
+import re
 import ofxtools
 from pyparsing import alphanums, CharsNotIn, Dict, Forward, Group, \
 Literal, OneOrMore, White, Word, ZeroOrMore
@@ -52,6 +52,12 @@ class OfcParser:
     def parse(self, ofc):
         """Parse a string argument and return a tree structure representing
         the parsed document."""
+        ofc = self.fix_malformed_ofc(ofc)
         return self.parser.parseString(ofc).asDict()
 
+    def fix_malformed_ofc(self, ofc):
+        """
+        Fix an OFC, by removing inline closing 'tags'
+        """
+        return re.compile(r'(\w+.*)<\/\w+>', re.UNICODE).sub(r'\1', ofc)
 
