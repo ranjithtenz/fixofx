@@ -175,7 +175,6 @@ if options.filename:
 
         try:
             srcfile = open(options.filename, 'rU')
-            import ipdb; ipdb.set_trace()
             rawtext = srcfile.read()
             srcfile.close()
         except StandardError, detail:
