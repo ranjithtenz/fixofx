@@ -21,6 +21,7 @@ import re
 import ofxtools
 from pyparsing import alphanums, CharsNotIn, Dict, Forward, Group, \
 Literal, OneOrMore, White, Word, ZeroOrMore
+from pyparsing import ParseException
 
 class OfcParser:
     """Dirt-simple OFC parser for interpreting OFC documents."""
@@ -52,12 +53,40 @@ class OfcParser:
     def parse(self, ofc):
         """Parse a string argument and return a tree structure representing
         the parsed document."""
-        ofc = self.fix_malformed_ofc(ofc)
-        return self.parser.parseString(ofc).asDict()
+        ofc = self.remove_inline_closing_tags(ofc)
+        try:
+          return self.parser.parseString(ofc).asDict()
+        except ParseException:
+          fixed_ofc = self.fix_ofc(ofc)
+          return self.parser.parseString(fixed_ofc).asDict()
 
-    def fix_malformed_ofc(self, ofc):
+    def remove_inline_closing_tags(self, ofc):
         """
         Fix an OFC, by removing inline closing 'tags'
         """
         return re.compile(r'(\w+.*)<\/\w+>', re.UNICODE).sub(r'\1', ofc)
 
+    def fix_ofc(self, ofc):
+        """
+        Do some magic to fix an bad OFC
+        """
+        ofc = self._remove_bad_tags(ofc)
+        ofc = self._fill_dummy_tags(ofc)
+        return self._inject_tags(ofc)
+
+    def _remove_bad_tags(self, ofc):
+        ofc_without_trnrs = re.sub(r'<[/]*TRNRS>', '', ofc)
+        return re.sub(r'<[/]*CLTID>\w+', '', ofc_without_trnrs)
+
+    def _fill_dummy_tags(self, ofc):
+        expression = r'(<%s>)[^\w+]'
+        replacement = r'<%s>0\n'
+        ofc = re.sub(expression % 'FITID', replacement % 'FITID' , ofc)
+        filled_ofc = re.sub(expression % 'CHKNUM', replacement % 'CHKNUM' , ofc)
+
+        return filled_ofc
+
+    def _inject_tags(self, ofc):
+        tags ="<OFC>\n<ACCTSTMT>\n<ACCTFROM>\n<BANKID>0\n<ACCTID>0\n<ACCTTYPE>0\n</ACCTFROM>\n"
+        if not re.findall(r'<OFC>\w*\s*<ACCTSTMT>', ofc):
+            return ofc.replace('<OFC>', tags).replace('</OFC>', '</ACCTSTMT>\n</OFC>')
