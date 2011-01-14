@@ -9,8 +9,9 @@ from pyparsing import ParseException
 
 import unittest
 
-
-bad_ofc_path = join(realpath(dirname(__file__)), 'fixtures', 'bad.ofc')
+FIXTURES_PATH = join(realpath(dirname(__file__)), 'fixtures')
+bad_ofc_path = join(FIXTURES_PATH, 'bad.ofc')
+no_bankinfo_ofc_path = join(FIXTURES_PATH, 'nobankinfo_and_trnrs.ofc')
 
 def assert_not_raises(function, param, exception):
     try:
@@ -26,6 +27,11 @@ class OFCParserTestCase(unittest.TestCase):
 
     def test_parsing_bad_ofc_should_not_raise_exception(self):
         assert_not_raises(self.parser.parse, self.ofc, ParseException)
+
+    def test_parsing_ofc_without_bank_info_not_raise_Exception(self):
+        self.ofc = open(no_bankinfo_ofc_path, 'r').read()
+        assert_not_raises(self.parser.parse, self.ofc, Exception)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -29,7 +29,7 @@ def suite():
                        'ofx_account', 'ofx_builder', 'ofx_client',
                        'ofx_document', 'ofx_error', 'ofx_parser',
                        'ofx_request', 'ofx_response', 'ofx_validators',
-                       'ofc_parser']
+                       'ofc_parser', 'ofc_converter']
     alltests = unittest.TestSuite()
 
     for module in map(__import__, modules_to_test):
