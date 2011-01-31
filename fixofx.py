@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 # Copyright 2005-2010 Wesabe, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,67 +57,67 @@ except ImportError:
     pass
 
 
-def convert(text, filetype, verbose=False, fid="UNKNOWN", org="UNKNOWN", 
+def convert(text, filetype, verbose=False, fid="UNKNOWN", org="UNKNOWN",
             bankid="UNKNOWN", accttype="UNKNOWN", acctid="UNKNOWN",
-            balance="UNKNOWN", curdef=None, lang="ENG", dayfirst=False, 
+            balance="UNKNOWN", curdef=None, lang="ENG", dayfirst=False,
             debug=False):
-    
+
     # This finishes a verbosity message started by the caller, where the
     # caller explains the source command-line option and this explains the
     # source format.
-    if verbose: 
+    if verbose:
         sys.stderr.write("Converting from %s format.\n" % filetype)
 
     if options.debug and (filetype in ["OFC", "QIF"] or filetype.startswith("OFX")):
         sys.stderr.write("Starting work on raw text:\n")
         sys.stderr.write(rawtext + "\n\n")
-    
+
     if filetype.startswith("OFX/2"):
         if verbose: sys.stderr.write("No conversion needed; returning unmodified.\n")
-        
+
         # The file is already OFX 2 -- return it unaltered, ignoring
         # any of the parameters passed to this method.
         return text
-    
+
     elif filetype.startswith("OFX"):
         if verbose: sys.stderr.write("Converting to OFX/2.0...\n")
-        
+
         # This will throw a ParseException if it is unable to recognize
         # the source format.
-        response = ofx.Response(text, debug=debug)        
+        response = ofx.Response(text, debug=debug)
         return response.as_xml(original_format=filetype)
-    
+
     elif filetype == "OFC":
         if verbose: sys.stderr.write("Beginning OFC conversion...\n")
         converter = ofxtools.OfcConverter(text, fid=fid, org=org, curdef=curdef,
                                           lang=lang, debug=debug)
-        
+
         # This will throw a ParseException if it is unable to recognize
         # the source format.
-        if verbose: 
+        if verbose:
             sys.stderr.write("Converting to OFX/1.02...\n\n%s\n\n" %
                              converter.to_ofx102())
             sys.stderr.write("Converting to OFX/2.0...\n")
-                                             
+
         return converter.to_xml()
-    
+
     elif filetype == "QIF":
         if verbose: sys.stderr.write("Beginning QIF conversion...\n")
         converter = ofxtools.QifConverter(text, fid=fid, org=org,
-                                          bankid=bankid, accttype=accttype, 
-                                          acctid=acctid, balance=balance, 
+                                          bankid=bankid, accttype=accttype,
+                                          acctid=acctid, balance=balance,
                                           curdef=curdef, lang=lang, dayfirst=dayfirst,
                                           debug=debug)
-        
+
         # This will throw a ParseException if it is unable to recognize
         # the source format.
-        if verbose: 
+        if verbose:
             sys.stderr.write("Converting to OFX/1.02...\n\n%s\n\n" %
                              converter.to_ofx102())
             sys.stderr.write("Converting to OFX/2.0...\n")
-                                             
+
         return converter.to_xml()
-    
+
     else:
         raise TypeError("Unable to convert source format '%s'." % filetype)
 
@@ -148,6 +148,8 @@ parser.add_option("--balance", dest="balance", default="UNKNOWN",
                   help="(QIF only) Account balance to use in output")
 parser.add_option("--dayfirst", action="store_true", dest="dayfirst", default=False,
                   help="(QIF only) Parse dates day first (UK format)")
+parser.add_option("-s", "--string", dest="string", default=None,
+                  help="string to convert")
 (options, args) = parser.parse_args()
 
 #
@@ -168,9 +170,9 @@ rawtext = None
 
 if options.filename:
     if os.path.isfile(options.filename):
-        if options.verbose: 
+        if options.verbose:
             sys.stderr.write("Reading from '%s'\n." % options.filename)
-        
+
         try:
             srcfile = open(options.filename, 'rU')
             rawtext = srcfile.read()
@@ -180,19 +182,24 @@ if options.filename:
             print "Exiting."
             sys.stderr.write("fixofx failed with error code 1\n")
             sys.exit(1)
-        
+
     else:
         print "'%s' does not appear to be a file.  Try --help." % options.filename
         sys.stderr.write("fixofx failed with error code 2\n")
         sys.exit(2)
 
+elif options.string:
+    if options.verbose:
+        sys.stderr.write("Reading from string\n")
+    rawtext = options.string.replace('\r','')
+
 else:
-    if options.verbose: 
+    if options.verbose:
         sys.stderr.write("Reading from standard input.\n")
-    
+
     stdin_universal = os.fdopen(os.dup(sys.stdin.fileno()), "rU")
     rawtext = stdin_universal.read()
-    
+
     if rawtext == "" or rawtext is None:
         print "No input.  Pipe a file to convert to the script,\n" + \
               "or call with -f.  Call with --help for more info."
@@ -208,16 +215,16 @@ try:
     # rather than parsing the file to make sure.  (Parsing will fail
     # below if the guess is wrong on OFX/1 and QIF.)
     filetype  = ofx.FileTyper(rawtext).trust()
-    
+
     if options.type:
         print "Input file type is %s." % filetype
         sys.exit(0)
     elif options.debug:
         sys.stderr.write("Input file type is %s.\n" % filetype)
-    
-    converted = convert(rawtext, filetype, verbose=options.verbose, 
-                        fid=options.fid, org=options.org, bankid=options.bankid, 
-                        accttype=options.accttype, acctid=options.acctid, 
+
+    converted = convert(rawtext, filetype, verbose=options.verbose,
+                        fid=options.fid, org=options.org, bankid=options.bankid,
+                        accttype=options.accttype, acctid=options.acctid,
                         balance=options.balance, curdef=options.curdef,
                         lang=options.lang, dayfirst=options.dayfirst,
                         debug=options.debug)

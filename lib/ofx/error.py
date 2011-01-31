@@ -1,11 +1,12 @@
+#coding: utf-8
 # Copyright 2005-2010 Wesabe, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,8 +14,8 @@
 # limitations under the License.
 
 #
-# ofx.error - OFX error message exception 
-# 
+# ofx.error - OFX error message exception
+#
 
 
 class Error(Exception):
@@ -96,12 +97,12 @@ class Error(Exception):
     def interpret_code(self, code=None):
         if code is None:
             code = self.code
-        
+
         if self.codetable.has_key(code):
             return self.codetable[code]
         else:
             return "Unknown error code"
-    
+
     def str(self):
         format = "%s\n(%s %s: %s)"
         return format % (self.msg, self.severity, self.code,

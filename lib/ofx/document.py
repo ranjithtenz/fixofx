@@ -1,11 +1,12 @@
+#coding: utf-8
 # Copyright 2005-2010 Wesabe, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,15 +41,8 @@ class Document:
         # method so that we can start to survey what encodings
         # we're actually seeing, and use that to maybe be smarter
         # about this in the future.
-        encoding = ""
-        if self.parse_dict["header"]["ENCODING"] == "USASCII":
-            encoding = "US-ASCII"
-        elif self.parse_dict["header"]["ENCODING"] == "UNICODE":
-            encoding = "UTF-8"
-        elif self.parse_dict["header"]["ENCODING"] == "NONE":
-            encoding = "UTF-8"
-        else:
-            encoding = self.parse_dict["header"]["ENCODING"]
+        #forcing encoding to utf-8
+        encoding = "UTF-8"
 
         xml += """<?xml version="1.0" encoding="%s"?>\n""" % encoding
         xml += """<?OFX OFXHEADER="200" VERSION="200" """ + \

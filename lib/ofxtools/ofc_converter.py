@@ -1,11 +1,13 @@
+#coding: utf-8
+
 # Copyright 2005-2010 Wesabe, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,16 +73,22 @@ class OfcConverter:
 
         if self.debug: sys.stderr.write("Extracting document properties.\n")
 
-        try:
-            self.bankid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["BANKID"]
-            acct_code       = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCTTYPE"]
-            self.accttype   = self.acct_types.get(acct_code, "UNKNOWN")
-            self.acctid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCTID"]
-        except KeyError:
-            self.bankid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCOUNT"]["BANKID"]
-            acct_code       = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCOUNT"]["ACCTTYPE"]
-            self.accttype   = self.acct_types.get(acct_code, "UNKNOWN")
-            self.acctid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCOUNT"]["ACCTID"]
+        if self.parsed_ofc["document"]["OFC"].asDict().has_key('TRNRS'):
+            #TRNRS has almost the same info of ACCTSTMT. Just with another name. Damn you Banks!
+            self.parsed_ofc["document"]["OFC"]['ACCTSTMT'] = self.parsed_ofc["document"]["OFC"]["TRNRS"]
+
+        if self.parsed_ofc["document"]["OFC"]["ACCTSTMT"].asDict().has_key('ACCTFROM'):
+            # Bank info ignored if not exists
+            try:
+                self.bankid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["BANKID"]
+                acct_code       = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCTTYPE"]
+                self.accttype   = self.acct_types.get(acct_code, "UNKNOWN")
+                self.acctid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCTID"]
+            except KeyError:
+                self.bankid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCOUNT"]["BANKID"]
+                acct_code       = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCOUNT"]["ACCTTYPE"]
+                self.accttype   = self.acct_types.get(acct_code, "UNKNOWN")
+                self.acctid     = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["ACCTFROM"]["ACCOUNT"]["ACCTID"]
 
         self.balance    = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["STMTRS"]["LEDGER"]
         self.start_date = self.parsed_ofc["document"]["OFC"]["ACCTSTMT"]["STMTRS"]["DTSTART"]

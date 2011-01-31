@@ -1,11 +1,12 @@
+#coding: utf-8
 # Copyright 2005-2010 Wesabe, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,11 +30,11 @@ class RoutingNumber:
             self.digits = None
             self.region_code = None
             self.converted = False
-    
+
     def is_valid(self):
         if self.converted is False or len(self.digits) != 9:
             return False
-        
+
         checksum = ((self.digits[0] * 3) +
                     (self.digits[1] * 7) +
                      self.digits[2]      +
@@ -44,7 +45,7 @@ class RoutingNumber:
                     (self.digits[7] * 7) +
                      self.digits[8]       )
         return (checksum % 10 == 0)
-    
+
     def get_type(self):
         # Remember that range() stops one short of the second argument.
         # In other words, "x in range(1, 13)" means "x >= 1 and x < 13".
@@ -60,7 +61,7 @@ class RoutingNumber:
             return "Traveller's Cheque"
         else:
             return None
-    
+
     def get_region(self):
         if self.region_code == 0:
             return "United States Government"
@@ -92,11 +93,11 @@ class RoutingNumber:
             return "Traveller's Cheque"
         else:
             return None
-    
+
     def to_s(self):
         return str(self.number) + " (valid: %s; type: %s; region: %s)" % \
             (self.is_valid(), self.get_type(), self.get_region())
-    
+
     def __repr__(self):
         return self.to_s()
-    
+
